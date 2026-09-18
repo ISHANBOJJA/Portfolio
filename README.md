@@ -13,6 +13,7 @@ Ishan Bojja, born 2013. Background in STEM (Bioinformatics). Aspirations towards
 - Early Detection of Superficial Spreading Melanoma with Machine Learning - Ishan Bojja, Aadarsh Taleppady
 - Early Detection of Congenital Nystagmus with Artificial Intelligence - Ishan Bojja, Howell Jian
 - Implementing Artificial Intelligence with MRI Scans for Tumor Detection - Ishan Bojja
+- AlwaysAround: An Artificial Intelligence Powered Desktop Robot Assistant
 
 **Activities**
 - Coding Club Officer at Oak Valley Middle School
