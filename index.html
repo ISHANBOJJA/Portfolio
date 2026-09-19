@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en" data-shell="pwsh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ishan Bojja</title>
+<meta name="description" content="Bioinformatics and machine learning projects, science fair awards, and teaching work by Ishan Bojja.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+
+  /* ---------- Windows PowerShell (conhost + PSReadLine) ---------- */
+  html[data-shell="pwsh"] {
+    --page:        #0a1526;
+    --bg:          #012456;
+    --fg:          #eeedf0;
+    --dim:         #8d9bbd;
+    --cmdlet:      #eec64f;
+    --param:       #c3c9d6;
+    --str:         #4ec9d6;
+    --key:         #eec64f;
+    --num:         #b5cea8;
+    --sym:         #eeedf0;
+    --accent:      #eec64f;
+    --bar:         #f0f0f0;
+    --bar-fg:      #1a1a1a;
+    --bar-line:    #c9c9c9;
+    --btn:         #1a1a1a;
+    --btn-hover:   #dcdcdc;
+    --close-hover: #e81123;
+    --select:      #0078d7;
+    --radius:      0px;
+    --btn-radius:  0px;
+    --mono: Consolas, "Lucida Console", "DejaVu Sans Mono", Menlo, monospace;
+    --lh: 1.45;
+  }
+
+  /* ---------- Linux shell (GNOME Terminal on Ubuntu) ---------- */
+  html[data-shell="bash"] {
+    --page:        #180411;
+    --bg:          #300a24;
+    --fg:          #e6e2e4;
+    --dim:         #9a8896;
+    --cmdlet:      #e6e2e4;
+    --param:       #e6e2e4;
+    --str:         #8ae234;
+    --key:         #34e2e2;
+    --num:         #ad7fa8;
+    --sym:         #e6e2e4;
+    --accent:      #8ae234;
+    --bar:         #3b3b3b;
+    --bar-fg:      #d8d8d8;
+    --bar-line:    #242424;
+    --btn:         #d8d8d8;
+    --btn-hover:   #4d4d4d;
+    --close-hover: #e95420;
+    --select:      #5a2c4a;
+    --radius:      10px;
+    --btn-radius:  50%;
+    --mono: "Ubuntu Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    --lh: 1.4;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 20px 72px;
+    background: var(--page);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: var(--lh);
+    color: var(--fg);
+    transition: background 220ms linear;
+  }
+  html[data-shell="bash"] body { font-size: 17px; }
+
+  ::selection { background: var(--select); color: #fff; }
+
+  /* ---------- window ---------- */
+  .win {
+    max-width: 860px;
+    margin: 0 auto;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,.55);
+    transition: border-radius 220ms linear;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 6px 0 10px;
+    background: var(--bar);
+    color: var(--bar-fg);
+    border-bottom: 1px solid var(--bar-line);
+    font-size: 13px;
+    user-select: none;
+  }
+  html[data-shell="bash"] .bar { height: 38px; font-size: 14px; }
+
+  .bar-icon {
+    width: 14px; height: 14px; flex: none;
+    background: var(--bg);
+    border: 1px solid rgba(0,0,0,.25);
+  }
+  html[data-shell="bash"] .bar-icon { display: none; }
+
+  .bar-title { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  html[data-shell="bash"] .bar-title { text-align: center; }
+
+  .bar-btns { display: flex; gap: 2px; flex: none; }
+  html[data-shell="bash"] .bar-btns { gap: 9px; padding-right: 6px; }
+
+  .bar-btn {
+    width: 34px; height: 24px;
+    border: 0; padding: 0;
+    background: transparent;
+    color: var(--btn);
+    border-radius: var(--btn-radius);
+    font: inherit; font-size: 11px;
+    line-height: 1;
+    cursor: default;
+    display: grid; place-items: center;
+  }
+  html[data-shell="bash"] .bar-btn { width: 20px; height: 20px; background: #4d4d4d; font-size: 10px; }
+  .bar-btn:hover { background: var(--btn-hover); }
+  .bar-btn.close:hover { background: var(--close-hover); color: #fff; }
+
+  /* ---------- terminal body ---------- */
+  .term {
+    background: var(--bg);
+    padding: 14px 18px 26px;
+    min-height: 60vh;
+    transition: opacity 170ms ease, transform 170ms ease;
+  }
+  .term.swapping { opacity: 0; transform: translateY(5px); }
+
+  .banner { color: var(--dim); margin-bottom: 14px; }
+
+  .block { margin: 0 0 22px; }
+
+  .line { white-space: pre-wrap; word-break: break-word; }
+
+  .out {
+    margin: 2px 0 0;
+    white-space: pre;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .out.wrap { white-space: pre-wrap; word-break: break-word; }
+
+  .c-cmdlet { color: var(--cmdlet); }
+  .c-param  { color: var(--param); }
+  .c-str    { color: var(--str); }
+  .c-key    { color: var(--key); }
+  .c-num    { color: var(--num); }
+  .c-dim    { color: var(--dim); }
+  .c-sym    { color: var(--sym); }
+  .c-user   { color: #8ae234; font-weight: 700; }
+  .c-path   { color: #729fcf; font-weight: 700; }
+  .c-head   { color: var(--fg); }
+  html[data-shell="pwsh"] .c-head { color: var(--fg); }
+
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  a:focus-visible, .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- cursor ---------- */
+  .cursor {
+    display: inline-block;
+    width: .58em;
+    background: var(--fg);
+    animation: blink 1.05s steps(1) infinite;
+    vertical-align: baseline;
+  }
+  html[data-shell="pwsh"] .cursor { height: 2px; transform: translateY(-1px); }
+  html[data-shell="bash"]  .cursor { height: 1.05em; transform: translateY(.18em); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- theme switch ---------- */
+  .switch {
+    position: fixed;
+    top: 22px; right: 22px;
+    z-index: 20;
+    width: 236px; height: 66px;
+    padding: 5px;
+    border: 2px solid var(--fg);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font: inherit;
+    color: var(--fg);
+    cursor: pointer;
+    display: block;
+    box-shadow: 0 6px 0 rgba(0,0,0,.45);
+    transition: background 220ms linear, border-color 220ms linear, border-radius 220ms linear, transform 90ms ease;
+  }
+  html[data-shell="bash"] .switch { border-radius: 40px; }
+  .switch:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,.45); }
+
+  .switch-track { position: relative; height: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+
+  .switch-knob {
+    position: absolute; top: 0; left: 0;
+    width: 50%; height: 100%;
+    background: var(--accent);
+    border-radius: calc(var(--radius) - 2px);
+    transition: transform 240ms cubic-bezier(.3,.8,.3,1), background 220ms linear, border-radius 220ms linear;
+  }
+  html[data-shell="bash"] .switch-knob { border-radius: 36px; transform: translateX(100%); }
+
+  .switch-label {
+    position: relative;
+    display: grid; place-items: center;
+    font-size: 14px;
+    letter-spacing: .01em;
+    color: var(--fg);
+    transition: color 220ms linear;
+  }
+  html[data-shell="pwsh"] .switch-label:first-child,
+  html[data-shell="bash"] .switch-label:last-child { color: #012456; font-weight: 700; }
+  html[data-shell="bash"] .switch-label:last-child { color: #16350a; }
+
+  /* ---------- scrollbars ---------- */
+  html[data-shell="pwsh"] ::-webkit-scrollbar { height: 14px; width: 14px; }
+  html[data-shell="pwsh"] ::-webkit-scrollbar-track { background: #f0f0f0; }
+  html[data-shell="pwsh"] ::-webkit-scrollbar-thumb { background: #cdcdcd; border: 3px solid #f0f0f0; }
+  html[data-shell="bash"] ::-webkit-scrollbar { height: 9px; width: 9px; }
+  html[data-shell="bash"] ::-webkit-scrollbar-track { background: transparent; }
+  html[data-shell="bash"] ::-webkit-scrollbar-thumb { background: #6f5566; border-radius: 9px; }
+
+  @media (max-width: 720px) {
+    body { padding: 16px 10px 56px; font-size: 13.5px; }
+    html[data-shell="bash"] body { font-size: 15px; }
+    .switch { position: static; width: 100%; max-width: 860px; margin: 0 auto 16px; height: 56px; }
+    .term { padding: 12px 12px 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<button class="switch" id="switch" role="switch" aria-checked="false" aria-label="Switch shell theme">
+  <span class="switch-track">
+    <span class="switch-knob" aria-hidden="true"></span>
+    <span class="switch-label">PowerShell</span>
+    <span class="switch-label">bash</span>
+  </span>
+</button>
+
+<main class="win">
+  <div class="bar">
+    <span class="bar-icon" aria-hidden="true"></span>
+    <span class="bar-title" id="bar-title">Windows PowerShell</span>
+    <span class="bar-btns" aria-hidden="true">
+      <span class="bar-btn" id="btn-min">&#8212;</span>
+      <span class="bar-btn" id="btn-max">&#9633;</span>
+      <span class="bar-btn close">&#10005;</span>
+    </span>
+  </div>
+  <div class="term" id="term"></div>
+</main>
+
+<script>
+/* =======================================================================
+   CONTENT. Edit below this line, nothing else needs touching.
+   ======================================================================= */
+
+const PROFILE = {
+  name: "Ishan Bojja",
+  // Left out on purpose: name + birth year + school is enough to identify
+  // and locate a minor. To put it back, set birthYear: 2013 and it will
+  // print in the about block.
+  birthYear: null,
+  user: "ishan",
+  host: "bojja",
+  // Replace both of these before publishing.
+  email: "add-your-email@example.com",
+  github: "github.com/add-your-username"
+};
+
+const ABOUT = [
+  "Bioinformatics and machine learning.",
+  "",
+  "I build models that read biological and medical data: skin lesions,",
+  "eye movement, MRI volumes. The goal is early detection, catching the",
+  "thing while it is still small enough to do something about.",
+  "",
+  "Currently looking for research mentorship in computational biology."
+];
+
+const AWARDS = [
+  { year: "2026", award: "Thermo Fisher Junior Innovators Challenge, Top 300", scope: "National" },
+  { year: "2026", award: "Advancing Equity through Innovation Award", scope: "National" },
+  { year: "2026", award: "California State Science and Engineering Fair", scope: "State" },
+  { year: "2026", award: "Greater San Diego Science Fair, Gold Categorical", scope: "Regional" },
+  { year: "2025", award: "Advancing Equity through Innovation Award", scope: "National" },
+  { year: "2025", award: "California State Science and Engineering Fair", scope: "State" },
+  { year: "2025", award: "California Seal of the Senate", scope: "State" },
+  { year: "2025", award: "Greater San Diego Science Fair, Gold Categorical", scope: "Regional" },
+  { year: "2026", award: "CyberPatriot Semifinals, Top 20", scope: "National" }
+];
+
+const PROJECTS = [
+  {
+    title: "Early Detection of Superficial Spreading Melanoma with Machine Learning",
+    field: "dermatology, computer vision",
+    team: ["Ishan Bojja", "Aadarsh Taleppady"]
+  },
+  {
+    title: "Early Detection of Congenital Nystagmus with Artificial Intelligence",
+    field: "ophthalmology, motion analysis",
+    team: ["Ishan Bojja", "Howell Jian"]
+  },
+  {
+    title: "Implementing Artificial Intelligence with MRI Scans for Tumor Detection",
+    field: "neuro-oncology, medical imaging",
+    team: ["Ishan Bojja"]
+  },
+  {
+    title: "AlwaysAround, an AI powered desktop robot assistant",
+    field: "robotics, embedded systems",
+    team: ["Ishan Bojja"]
+  }
+];
+
+const ACTIVITIES = [
+  "Coding Club Officer, Oak Valley Middle School",
+  "Instructor, summer coding camp, 2026. 35 students, co-taught."
+];
+
+/* =======================================================================
+   RENDERING
+   ======================================================================= */
+
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const pad = (s, n) => s + " ".repeat(Math.max(0, n - s.length));
+const span = (cls, text) => `<span class="c-${cls}">${esc(text)}</span>`;
+
+function aboutLines() {
+  const head = PROFILE.birthYear
+    ? `${PROFILE.name}, born ${PROFILE.birthYear}`
+    : PROFILE.name;
+  return [head, "=".repeat(head.length), ""].concat(ABOUT);
+}
+
+/* PowerShell Format-Table: padded columns with a dashed rule under headers. */
+function psTable(rows, cols) {
+  const w = cols.map(c => Math.max(c.head.length, ...rows.map(r => r[c.key].length)));
+  const head = cols.map((c, i) => pad(c.head, w[i])).join("  ").trimEnd();
+  const rule = cols.map((c, i) => pad("-".repeat(c.head.length), w[i])).join("  ").trimEnd();
+  const body = rows.map(r => cols.map((c, i) => pad(r[c.key], w[i])).join("  ").trimEnd());
+  return span("head", head) + "\n" + span("dim", rule) + "\n" + body.map(esc).join("\n");
+}
+
+/* column -t: same alignment, no rule, lowercase headers. */
+function shTable(rows, cols) {
+  const w = cols.map(c => Math.max(c.head.length, ...rows.map(r => r[c.key].length)));
+  const all = [cols.map((c, i) => pad(c.head.toLowerCase(), w[i])).join("  ").trimEnd()]
+    .concat(rows.map(r => cols.map((c, i) => pad(r[c.key], w[i])).join("  ").trimEnd()));
+  return span("dim", all[0]) + "\n" + all.slice(1).map(esc).join("\n");
+}
+
+/* PowerShell Format-List: "Key : value", arrays render as {a, b}. */
+function psList(items) {
+  const keys = ["Title", "Field", "Team"];
+  const kw = Math.max(...keys.map(k => k.length));
+  return items.map(p => {
+    const team = p.team.length > 1 ? "{" + p.team.join(", ") + "}" : p.team[0];
+    return [
+      span("key", pad("Title", kw)) + span("sym", " : ") + esc(p.title),
+      span("key", pad("Field", kw)) + span("sym", " : ") + esc(p.field),
+      span("key", pad("Team",  kw)) + span("sym", " : ") + esc(team)
+    ].join("\n");
+  }).join("\n\n");
+}
+
+/* jq output: cyan keys, green strings, structural punctuation plain. */
+function jqList(items) {
+  const q = s => span("str", '"' + s + '"');
+  const k = s => span("key", '"' + s + '"');
+  return items.map(p => {
+    const team = p.team.map((m, i) =>
+      "    " + q(m) + (i < p.team.length - 1 ? "," : "")
+    ).join("\n");
+    return [
+      "{",
+      "  " + k("title") + ": " + q(p.title) + ",",
+      "  " + k("field") + ": " + q(p.field) + ",",
+      "  " + k("team") + ": [",
+      team,
+      "  ]",
+      "}"
+    ].join("\n");
+  }).join("\n");
+}
+
+function contactLines() {
+  const w = 7;
+  return [
+    span("dim", pad("email", w)) + esc(PROFILE.email),
+    span("dim", pad("github", w)) + esc(PROFILE.github)
+  ].join("\n");
+}
+
+const AWARD_COLS = [
+  { head: "Year", key: "year" },
+  { head: "Award", key: "award" },
+  { head: "Scope", key: "scope" }
+];
+
+const SHELLS = {
+  pwsh: {
+    title: "Windows PowerShell",
+    banner: "PowerShell 7.4.6\nType 'help' for a list of commands.",
+    prompt: () => span("fg", `PS C:\\Users\\${PROFILE.name.split(" ")[0]}\\portfolio>`) + " ",
+    /* PSReadLine highlights cmdlets yellow and paths cyan. */
+    cmd: (cmdlet, rest) => span("cmdlet", cmdlet) + (rest ? span("str", " " + rest) : ""),
+    blocks: () => [
+      { cmdlet: "Get-Content", rest: ".\\about.txt", out: aboutLines().map(esc).join("\n"), wrap: true },
+      { cmdlet: "Import-Csv", rest: ".\\awards.csv | Format-Table", out: psTable(AWARDS, AWARD_COLS) },
+      { cmdlet: "Get-Content", rest: ".\\projects.json | ConvertFrom-Json | Format-List", out: psList(PROJECTS), wrap: true },
+      { cmdlet: "Get-Content", rest: ".\\activities.txt", out: ACTIVITIES.map(esc).join("\n"), wrap: true },
+      { cmdlet: "Get-Content", rest: ".\\contact.txt", out: contactLines() }
+    ]
+  },
+  bash: {
+    title: `${PROFILE.user}@${PROFILE.host}: ~/portfolio`,
+    banner: "Ubuntu 24.04.1 LTS\nLast login: on pts/0",
+    prompt: () =>
+      span("user", `${PROFILE.user}@${PROFILE.host}`) +
+      span("sym", ":") + span("path", "~/portfolio") + span("sym", "$") + " ",
+    /* bash has no syntax highlighting, so the whole line is plain. */
+    cmd: (cmdlet, rest) => span("cmdlet", cmdlet + (rest ? " " + rest : "")),
+    blocks: () => [
+      { cmdlet: "cat", rest: "about.txt", out: aboutLines().map(esc).join("\n"), wrap: true },
+      { cmdlet: "column", rest: "-t -s , awards.csv", out: shTable(AWARDS, AWARD_COLS) },
+      { cmdlet: "jq", rest: "'.[]' projects.json", out: jqList(PROJECTS), wrap: true },
+      { cmdlet: "cat", rest: "activities.txt", out: ACTIVITIES.map(esc).join("\n"), wrap: true },
+      { cmdlet: "cat", rest: "contact.txt", out: contactLines() }
+    ]
+  }
+};
+
+function render(shellName) {
+  const s = SHELLS[shellName];
+  const html = [`<div class="banner line">${esc(s.banner)}</div>`];
+
+  for (const b of s.blocks()) {
+    html.push(
+      `<div class="block">` +
+        `<div class="line">${s.prompt()}${s.cmd(b.cmdlet, b.rest)}</div>` +
+        `<div class="out${b.wrap ? " wrap" : ""}">${b.out}</div>` +
+      `</div>`
+    );
+  }
+
+  html.push(`<div class="line">${s.prompt()}<span class="cursor"></span></div>`);
+
+  document.getElementById("term").innerHTML = html.join("");
+  document.getElementById("bar-title").textContent = s.title;
+  document.getElementById("btn-min").innerHTML = shellName === "bash" ? "&#8722;" : "&#8212;";
+  document.getElementById("btn-max").innerHTML = shellName === "bash" ? "&#9633;" : "&#9633;";
+}
+
+/* ---------- switch wiring ---------- */
+
+const root = document.documentElement;
+const term = document.getElementById("term");
+const sw = document.getElementById("switch");
+
+let current = "pwsh";
+try {
+  const saved = localStorage.getItem("shell");
+  if (saved === "bash" || saved === "pwsh") current = saved;
+} catch (e) { /* storage unavailable, fall back to default */ }
+
+function apply(shellName, animate) {
+  current = shellName;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const commit = () => {
+    root.setAttribute("data-shell", shellName);
+    sw.setAttribute("aria-checked", shellName === "bash" ? "true" : "false");
+    render(shellName);
+    term.classList.remove("swapping");
+  };
+
+  if (animate && !reduce) {
+    term.classList.add("swapping");
+    setTimeout(commit, 170);
+  } else {
+    commit();
+  }
+
+  try { localStorage.setItem("shell", shellName); } catch (e) { /* ignore */ }
+}
+
+sw.addEventListener("click", () => apply(current === "pwsh" ? "bash" : "pwsh", true));
+
+apply(current, false);
+</script>
+</body>
+</html>
